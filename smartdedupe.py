@@ -138,6 +138,11 @@ class File(Base):
         if self.last_checked != new_last_modified:
             self.md5_hash = md5(full_path)
 
+    def delete(self):
+        os.remove(self.get_full_path())
+        s.remove(self)
+        s.commit()
+
 
 
 def get_computer_id():
@@ -199,7 +204,7 @@ def kill_from_pc(path, to_delete=False):
             if existing_copy:
                 print file1.get_full_path()
                 if to_delete:
-                    os.unlink(file1.get_full_path())
+                    file1.delete()
 
 
 
@@ -219,7 +224,7 @@ def prune(directory,  to_delete=False):
                 print file2.get_full_path(), existing_copy.get_full_path(),
                 print file2.md5_hash, existing_copy.md5_hash
                 if to_delete:
-                    os.remove(file2.get_full_path())
+                    file2.delete()
 
 
 def get_or_create_folder(path):
