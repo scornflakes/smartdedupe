@@ -140,7 +140,7 @@ class File(Base):
 
     def delete(self):
         os.remove(self.get_full_path())
-        s.remove(self)
+        s.delete(self)
         s.commit()
 
 
@@ -192,7 +192,7 @@ def remove_neighbor_dupes(path, to_delete=False):
 
 def kill_from_pc(path, to_delete=False):
 
-    print 'to remove same dir:'
+    print 'to delete files on this pc that exist on another pc'
     from os.path import join
     for root, dirs, files in os.walk(path):
         for f in files:
