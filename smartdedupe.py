@@ -223,9 +223,6 @@ def prune(directory, to_delete=False, verbose_mode=True):
     ### does not identify copies in same dir!!
 
     print('to prune:')
-
-    from os.path import join
-
     for root, dirs, files in os.walk(directory):
         for f in files:
 
