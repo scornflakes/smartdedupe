@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2
 
 from distutils.core import setup
 
@@ -10,6 +10,6 @@ setup(
     license='',
     author='scornflakes',
     author_email='',
-    description='', requires=['sqlalchemy', 'mysql-python']
+    description='', requires=['sqlalchemy', 'mysql_python']
 )
 #mysql-connector c??
