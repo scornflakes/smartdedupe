@@ -2,7 +2,7 @@
 __author__ = 'scornflakes'
 import datetime
 import hashlib
-import ConfigParser
+import configparser
 import socket
 import os
 import sys
@@ -30,7 +30,7 @@ db_engine: sqlite:///{}
 """.format(db_location))
     file1.close()
 
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(settings_file)
 db_engine = config.get("Database", 'db_engine')
 
