@@ -175,7 +175,7 @@ def populate_db( root_folder):
             pass
 
 
-def remove_neighbor_dupes(path, to_delete=False):
+def remove_neighbor_dupes(path, to_delete=False, verbose_mode=True):
 
     print 'to remove same dir:'
     from os.path import join
@@ -188,10 +188,14 @@ def remove_neighbor_dupes(path, to_delete=False):
                 .filter(File.file_name != file1.file_name)\
                 .first()
             if existing_copy:
-                print file1.get_full_path(), existing_copy.get_full_path(),
-                print file1.md5_hash, existing_copy.md5_hash
+                if verbose_mode:
+                    print file1.get_full_path(), existing_copy.get_full_path(),
+                    print file1.md5_hash, existing_copy.md5_hash
+                if to_delete:
+                    file1.delete()
 
-def kill_from_pc(path, to_delete=False):
+
+def kill_from_pc(path, to_delete=False, verbose_mode=True):
 
     print 'to delete files on this pc that exist on another pc'
     from os.path import join
@@ -203,13 +207,14 @@ def kill_from_pc(path, to_delete=False):
                 .filter(File.computer_id != file1.computer_id)\
                 .first()
             if existing_copy:
-                print file1.get_full_path()
+                if verbose_mode:
+                    print file1.get_full_path()
                 if to_delete:
                     file1.delete()
 
 
 
-def prune(directory,  to_delete=False):
+def prune(directory,  to_delete=False, verbose_mode=True):
 ### does not identify copies in same dir!!
 
     print 'to prune:'
@@ -222,8 +227,9 @@ def prune(directory,  to_delete=False):
                 .filter(File.md5_hash == file2.md5_hash)\
                 .filter(File.path != file2.path).first()
             if existing_copy and (directory not in existing_copy.get_full_path()):
-                print file2.get_full_path(), existing_copy.get_full_path(),
-                print file2.md5_hash, existing_copy.md5_hash
+                if verbose_mode:
+                    print file2.get_full_path(), existing_copy.get_full_path(),
+                    print file2.md5_hash, existing_copy.md5_hash
                 if to_delete:
                     file2.delete()
 
@@ -249,10 +255,11 @@ def get_or_create_file(path, file_name):
 def main():
     parser = argparse.ArgumentParser(description="find duplicates in folders")
     parser.add_argument("-d", "--delete", action='store_true')
+    parser.add_argument("-v", "--verbose", action='store_true')
     parser.add_argument("-s", "--scan_dirs", action='append')
     parser.add_argument("-l", "--list_dupes", action='append')
     parser.add_argument("-n", "--list_neighbors", action='append')
-    parser.add_argument("-x", "--kill_from_pc", action='append')
+    parser.add_argument("-k", "--kill_from_pc", action='append')
     args = parser.parse_args()
     print args
 
@@ -262,15 +269,13 @@ def main():
             populate_db(root_folder)
     if args.list_dupes:
         for dir in args.list_dupes:
-            prune(dir, to_delete=args.delete)
+            prune(dir, to_delete=args.delete,verbose_mode=args.verbose)
     if args.list_neighbors:
         for dir in args.list_neighbors:
-            remove_neighbor_dupes(dir, to_delete=args.delete)
+            remove_neighbor_dupes(dir, to_delete=args.delete, verbose_mode=args.verbose)
     if args.kill_from_pc:
         for dir in args.kill_from_pc:
-            kill_from_pc(dir, to_delete=args.delete)
-
-
+            kill_from_pc(dir, to_delete=args.delete, verbose_mode=args.verbose)
 
 
 Base.metadata.create_all(engine)
