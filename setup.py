@@ -13,4 +13,3 @@ setup(
     #description='', requires=['sqlalchemy', 'mysql_python']
     description='', requires=['sqlalchemy', 'mysqlclient']
 )
-#mysql-connector c??
