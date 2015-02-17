@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 __author__ = 'scornflakes'
 import datetime
 import hashlib
@@ -37,11 +37,14 @@ db_engine = config.get("Database", 'db_engine')
 engine = sqlalchemy.create_engine(db_engine)
 Base = declarative_base(bind=engine)
 
+
 def md5string(str):
     import hashlib
+
     m = hashlib.md5()
     m.update(str)
     return m.hexdigest()
+
 
 def md5(file_path):
     try:
@@ -56,6 +59,7 @@ def md5(file_path):
         return m.hexdigest()
     except IOError:
         return None
+
 
 # http://akiscode.com/articles/sha-1directoryhash.shtml
 
@@ -91,7 +95,7 @@ class Folder(Base):
         # path = path_parts[0:-1]
 
         self.path = full_path
-        self.shrunk_path = ("{%d}" % self.parent_id) +PATH_SEP+self.folder_name
+        self.shrunk_path = ("{%d}" % self.parent_id) + PATH_SEP + self.folder_name
 
     def get_full_path(self):
         global PATH_SEP
@@ -141,10 +145,9 @@ class File(Base):
 
     def delete(self):
         os.remove(self.get_full_path())
-        #s.delete(self)
+        # s.delete(self)
         self.deleted = True
         s.commit()
-
 
 
 def get_computer_id():
@@ -158,11 +161,11 @@ def get_computer_id():
     return computer_id
 
 
-def populate_db( root_folder):
+def populate_db(root_folder):
     entries = os.listdir(root_folder.get_full_path())
 
     for entry in entries:
-        print entry
+        print(entry)
         path = root_folder.get_full_path()
         entry_full_path = PATH_SEP.join((path, entry))
         try:
@@ -177,66 +180,64 @@ def populate_db( root_folder):
             pass
 
 
-
-
 def remove_neighbor_dupes(path, to_delete=False, verbose_mode=True):
-
-    print 'to remove same dir:'
-    from os.path import join
+    print('to remove same dir:')
     for root, dirs, files in os.walk(path):
         for f in files:
             file1 = get_or_create_file(root, f)
-            existing_copy = s.query(File)\
-                .filter(File.md5_hash == file1.md5_hash)\
-                .filter(File.path == file1.path)\
-                .filter(File.file_name != file1.file_name)\
-                .filter(File.deleted != False)\
+            existing_copy = s.query(File) \
+                .filter(File.md5_hash == file1.md5_hash) \
+                .filter(File.path == file1.path) \
+                .filter(File.file_name != file1.file_name) \
+                .filter(File.deleted != False) \
                 .first()
             if existing_copy:
                 if verbose_mode:
-                    print file1.get_full_path(), existing_copy.get_full_path(),
-                    print file1.md5_hash, existing_copy.md5_hash
+                    print(file1.get_full_path(), existing_copy.get_full_path(), )
+                    print(file1.md5_hash, existing_copy.md5_hash)
                 if to_delete:
                     file1.delete()
 
 
 def kill_from_pc(path, to_delete=False, verbose_mode=True):
-
-    print 'to delete files on this pc that exist on another pc'
+    print('to delete files on this pc that exist on another pc')
     from os.path import join
+
     for root, dirs, files in os.walk(path):
         for f in files:
             file1 = get_or_create_file(root, f)
-            existing_copy = s.query(File)\
-                .filter(File.md5_hash == file1.md5_hash)\
-                .filter(File.computer_id != file1.computer_id)\
-                .filter(File.deleted != False)\
+            existing_copy = s.query(File) \
+                .filter(File.md5_hash == file1.md5_hash) \
+                .filter(File.computer_id != file1.computer_id) \
+                .filter(File.deleted != False) \
                 .first()
             if existing_copy:
                 if verbose_mode:
-                    print file1.get_full_path()
+                    print(file1.get_full_path())
+
                 if to_delete:
                     file1.delete()
 
 
+def prune(directory, to_delete=False, verbose_mode=True):
+    ### does not identify copies in same dir!!
 
-def prune(directory,  to_delete=False, verbose_mode=True):
-### does not identify copies in same dir!!
+    print('to prune:')
 
-    print 'to prune:'
     from os.path import join
+
     for root, dirs, files in os.walk(directory):
         for f in files:
 
             file2 = File(root, f)
-            existing_copy = s.query(File)\
-                .filter(File.md5_hash == file2.md5_hash)\
-                .filter(File.deleted != False)\
+            existing_copy = s.query(File) \
+                .filter(File.md5_hash == file2.md5_hash) \
+                .filter(File.deleted != False) \
                 .filter(File.path != file2.path).first()
             if existing_copy and (directory not in existing_copy.get_full_path()):
                 if verbose_mode:
-                    print file2.get_full_path(), existing_copy.get_full_path(),
-                    print file2.md5_hash, existing_copy.md5_hash
+                    print(file2.get_full_path(), existing_copy.get_full_path(),)
+                    print(file2.md5_hash, existing_copy.md5_hash)
                 if to_delete:
                     file2.delete()
 
@@ -249,6 +250,7 @@ def get_or_create_folder(path):
         s.commit()
     return folder
 
+
 def get_or_create_file(path, file_name):
     file1 = s.query(File).filter(File.file_name == file_name, File.path == path).first()
     if not file1:
@@ -259,6 +261,7 @@ def get_or_create_file(path, file_name):
     s.commit()
     return file1
 
+
 def main():
     parser = argparse.ArgumentParser(description="find duplicates in folders")
     parser.add_argument("-d", "--delete", action='store_true')
@@ -268,24 +271,24 @@ def main():
     parser.add_argument("-n", "--list_neighbors", action='append')
     parser.add_argument("-k", "--kill_from_pc", action='append')
     args = parser.parse_args()
-    print args
+
 
     if args.scan_dirs:
         for dir in args.scan_dirs:
             root_folder = get_or_create_folder(dir)
             current_datetime = datetime.datetime.now()
             populate_db(root_folder)
-            missing_files = s.query(File)\
-                .filter(File.last_checked < current_datetime)\
-                .filter(File.computer_id==get_computer_id())\
+            missing_files = s.query(File) \
+                .filter(File.last_checked < current_datetime) \
+                .filter(File.computer_id == get_computer_id()) \
                 .all()
             for missing_file in missing_files:
                 if root_folder in missing_file.get_full_path():
                     missing_file.deleted = True
-            s.commit
+            s.commit()
     if args.list_dupes:
         for dir in args.list_dupes:
-            prune(dir, to_delete=args.delete,verbose_mode=args.verbose)
+            prune(dir, to_delete=args.delete, verbose_mode=args.verbose)
     if args.list_neighbors:
         for dir in args.list_neighbors:
             remove_neighbor_dupes(dir, to_delete=args.delete, verbose_mode=args.verbose)
@@ -297,7 +300,6 @@ def main():
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 s = Session()
-
 
 if __name__ == "__main__":
     main()
