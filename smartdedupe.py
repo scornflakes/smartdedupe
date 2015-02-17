@@ -1,5 +1,6 @@
-__author__ = 'scornflakes'
 #!/usr/bin/env python2
+__author__ = 'scornflakes'
+
 
 import datetime
 import hashlib
