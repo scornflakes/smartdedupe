@@ -225,7 +225,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
 
     print('to prune:', directory)
     files = s.query(File)\
-        .filter(File.path.like(directory+"%"))\
+        .filter(File.path.contains(directory))\
         .filter(File.is_deleted == False) \
         .all()
 
