@@ -194,7 +194,7 @@ def remove_neighbor_dupes(path, to_delete=False, verbose_mode=True):
                 .first()
             if existing_copy:
                 if verbose_mode:
-                    print(file1.get_full_path(), existing_copy.get_full_path(), )
+                    print(repr(file1.get_full_path()), repr(existing_copy.get_full_path()), )
                     print(file1.md5_hash, existing_copy.md5_hash)
                 if to_delete:
                     file1.delete()
@@ -214,7 +214,7 @@ def kill_from_pc(path, to_delete=False, verbose_mode=True):
                 .first()
             if existing_copy:
                 if verbose_mode:
-                    print(file1.get_full_path(), existing_copy.get_full_path(), existing_copy.computer_id)
+                    print(repr(file1.get_full_path()), repr(existing_copy.get_full_path()), existing_copy.computer_id)
 
                 if to_delete:
                     file1.delete()
@@ -225,7 +225,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
 
     print('to prune:', directory)
     directorymatch = directory.replace('\\','\\\\')+"%"
-    print(directorymatch)
+    print(repr(directorymatch))
     files = s.query(File)\
         .filter(File.path.like(directorymatch))\
         .filter(File.is_deleted == False) \
@@ -242,7 +242,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
             .filter(File.path != file2.path).first()
         if existing_copy and (directory not in existing_copy.get_full_path()):
             if verbose_mode:
-                print(file2.get_full_path().decode("latin-1"), existing_copy.get_full_path().decode("latin-1"),)
+                print(repr(file2.get_full_path()), repr(existing_copy.get_full_path()),)
                 print(file2.md5_hash, existing_copy.md5_hash)
             if to_delete:
                 file2.delete()
