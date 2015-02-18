@@ -176,7 +176,7 @@ def populate_db(root_folder):
             elif os.path.isfile(entry_full_path) and os.access(entry_full_path, os.R_OK):
                 get_or_create_file(path, entry)
 
-        except WindowsError:
+        except Exception:
             pass
 
 
