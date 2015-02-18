@@ -225,7 +225,8 @@ def prune(directory, to_delete=False, verbose_mode=True):
 
     print('to prune:', directory)
     files = s.query(File)\
-        .filter(File.path.like(directory+"%"))\
+        .filter(File.path.like("%" +directory+"%"))\
+        .filter(File.is_deleted == False) \
         .all()
     if len(files)==0:
         print("No files found in specified directory!")
@@ -234,7 +235,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
         print(file2.name)
         existing_copy = s.query(File) \
             .filter(File.md5_hash == file2.md5_hash) \
-            .filter(~ File.path.like(directory+"%"))\
+            .filter(~ File.path.like("%" +directory+"%"))\
             .filter(File.is_deleted == False)\
             .filter(File.path != file2.path).first()
         if existing_copy and (directory not in existing_copy.get_full_path()):
