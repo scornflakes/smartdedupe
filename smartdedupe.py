@@ -116,7 +116,7 @@ class File(Base):
     last_modified = sqlalchemy.Column(sqlalchemy.DateTime)
     last_checked = sqlalchemy.Column(sqlalchemy.DateTime)
     folder = None
-    is_deleted = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False)
+    is_deleted = sqlalchemy.Column(sqlalchemy.Boolean)
 
     def __init__(self, path, file_name, folder_id=-1):
         self.computer_id = get_computer_id()
