@@ -223,7 +223,7 @@ def kill_from_pc(path, to_delete=False, verbose_mode=True):
 def prune(directory, to_delete=False, verbose_mode=True):
     ### does not identify copies in same dir!!
 
-    print('to prune:')
+    print('to prune:', directory)
     files = s.query(File)\
         .filter(File.path.like(directory+"%"))\
         .filter(File.is_deleted == False) \
