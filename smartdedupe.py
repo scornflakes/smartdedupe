@@ -229,8 +229,9 @@ def prune(directory, to_delete=False, verbose_mode=True):
         .filter(File.is_deleted == False) \
         .all()
 
-    for file2 in files:
 
+    for file2 in files:
+        print(file2.name)
         existing_copy = s.query(File) \
             .filter(File.md5_hash == file2.md5_hash) \
             .filter(~ File.path.like(directory+"%"))\
