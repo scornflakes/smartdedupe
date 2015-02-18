@@ -225,10 +225,11 @@ def prune(directory, to_delete=False, verbose_mode=True):
 
     print('to prune:', directory)
     files = s.query(File)\
-        .filter(File.path.contains(directory))\
+        .filter(File.path.like(directory+"%"))\
         .filter(File.is_deleted == False) \
         .all()
-
+    if len(files)==0:
+        print("No files found in specified directory!")
 
     for file2 in files:
         print(file2.name)
