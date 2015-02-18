@@ -116,7 +116,7 @@ class File(Base):
     last_modified = sqlalchemy.Column(sqlalchemy.DateTime)
     last_checked = sqlalchemy.Column(sqlalchemy.DateTime)
     folder = None
-    deleted = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False)
+    is_deleted = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False)
 
     def __init__(self, path, file_name, folder_id=-1):
         self.computer_id = get_computer_id()
@@ -127,7 +127,7 @@ class File(Base):
         self.md5_hash = md5(full_path)
         self.last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(full_path))
         self.last_checked = datetime.datetime.now()
-        self.deleted = False
+        self.is_deleted = False
 
     def get_full_path(self):
         global PATH_SEP
@@ -146,7 +146,7 @@ class File(Base):
     def delete(self):
         os.remove(self.get_full_path())
         # s.delete(self)
-        self.deleted = True
+        self.is_deleted = True
         s.commit()
 
 
@@ -189,7 +189,7 @@ def remove_neighbor_dupes(path, to_delete=False, verbose_mode=True):
                 .filter(File.md5_hash == file1.md5_hash) \
                 .filter(File.path == file1.path) \
                 .filter(File.file_name != file1.file_name) \
-                .filter(File.deleted != False) \
+                .filter(File.is_deleted != False) \
                 .first()
             if existing_copy:
                 if verbose_mode:
@@ -209,7 +209,7 @@ def kill_from_pc(path, to_delete=False, verbose_mode=True):
             existing_copy = s.query(File) \
                 .filter(File.md5_hash == file1.md5_hash) \
                 .filter(File.computer_id != file1.computer_id) \
-                .filter(File.deleted != False) \
+                .filter(File.is_deleted != False) \
                 .first()
             if existing_copy:
                 if verbose_mode:
@@ -229,7 +229,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
             file2 = File(root, f)
             existing_copy = s.query(File) \
                 .filter(File.md5_hash == file2.md5_hash) \
-                .filter(File.deleted != False) \
+                .filter(File.is_deleted != False) \
                 .filter(File.path != file2.path).first()
             if existing_copy and (directory not in existing_copy.get_full_path()):
                 if verbose_mode:
@@ -281,7 +281,7 @@ def main():
                 .all()
             for missing_file in missing_files:
                 if root_folder in missing_file.get_full_path():
-                    missing_file.deleted = True
+                    missing_file.is_deleted = True
             s.commit()
     if args.list_dupes:
         for dir in args.list_dupes:
