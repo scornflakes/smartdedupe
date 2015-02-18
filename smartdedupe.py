@@ -18,6 +18,7 @@ usr_home = os.getenv('USERPROFILE')
 if not usr_home:
     usr_home = os.path.expanduser('~/')
 settings_dir = os.path.join(usr_home, '.smartdedupe')
+print('settings dir', settings_dir)
 settings_file = os.path.join(settings_dir, 'settings.ini')
 db_location = os.path.join(settings_dir, 'smartdedupe.db')
 # make default directory and files if do not exist
@@ -213,7 +214,7 @@ def kill_from_pc(path, to_delete=False, verbose_mode=True):
                 .first()
             if existing_copy:
                 if verbose_mode:
-                    print(file1.get_full_path())
+                    print(file1.get_full_path(), existing_copy.get_full_path(), existing_copy.computer_id)
 
                 if to_delete:
                     file1.delete()
