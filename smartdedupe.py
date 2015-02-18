@@ -234,7 +234,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
         print("No files found in specified directory!")
 
     for file2 in files:
-        print(file2.file_name.decode("latin-1"))
+        print(repr(file2.file_name))
         existing_copy = s.query(File) \
             .filter(File.md5_hash == file2.md5_hash) \
             .filter(~ File.path.like(directory.replace('\\','\\\\')+"%"))\
