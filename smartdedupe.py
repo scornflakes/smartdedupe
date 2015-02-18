@@ -224,18 +224,20 @@ def prune(directory, to_delete=False, verbose_mode=True):
     ### does not identify copies in same dir!!
 
     print('to prune:', directory)
+    directorymatch = directory.replace('\\','\\\\')+"%"
+    print(directorymatch)
     files = s.query(File)\
-        .filter(File.path.like("%" +directory+"%"))\
+        .filter(File.path.like(directorymatch))\
         .filter(File.is_deleted == False) \
         .all()
     if len(files)==0:
         print("No files found in specified directory!")
 
     for file2 in files:
-        print(file2.name)
+        print(file2.file_name)
         existing_copy = s.query(File) \
             .filter(File.md5_hash == file2.md5_hash) \
-            .filter(~ File.path.like("%" +directory+"%"))\
+            .filter(~ File.path.like(directory.replace('\\','\\\\')+"%"))\
             .filter(File.is_deleted == False)\
             .filter(File.path != file2.path).first()
         if existing_copy and (directory not in existing_copy.get_full_path()):
