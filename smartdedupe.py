@@ -234,7 +234,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
         print("No files found in specified directory!")
 
     for file2 in files:
-        print(file2.file_name)
+        print(file2.file_name.decode("latin-1"))
         existing_copy = s.query(File) \
             .filter(File.md5_hash == file2.md5_hash) \
             .filter(~ File.path.like(directory.replace('\\','\\\\')+"%"))\
@@ -242,7 +242,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
             .filter(File.path != file2.path).first()
         if existing_copy and (directory not in existing_copy.get_full_path()):
             if verbose_mode:
-                print(file2.get_full_path(), existing_copy.get_full_path(),)
+                print(file2.get_full_path().decode("latin-1"), existing_copy.get_full_path().decode("latin-1"),)
                 print(file2.md5_hash, existing_copy.md5_hash)
             if to_delete:
                 file2.delete()
@@ -301,6 +301,8 @@ def main():
     if args.kill_from_pc:
         for dir in args.kill_from_pc:
             kill_from_pc(dir, to_delete=args.delete, verbose_mode=args.verbose)
+
+
 
 
 Base.metadata.create_all(engine)
