@@ -234,7 +234,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
         file2 = File(root, f)
         existing_copy = s.query(File) \
             .filter(File.md5_hash == file2.md5_hash) \
-            .filter(~ File.path.contains(directory))\
+            .filter(File.path.like(directory+"%"))\
             .filter(File.is_deleted == False)\
             .filter(File.path != file2.path).first()
         if existing_copy and (directory not in existing_copy.get_full_path()):
