@@ -115,8 +115,8 @@ class File(Base):
     md5_hash = sqlalchemy.Column(sqlalchemy.String(32), nullable=True)
     last_modified = sqlalchemy.Column(sqlalchemy.DateTime)
     last_checked = sqlalchemy.Column(sqlalchemy.DateTime)
-    folder = None
     is_deleted = sqlalchemy.Column(sqlalchemy.Boolean)
+    folder = None
 
     def __init__(self, path, file_name, folder_id=-1):
         self.computer_id = get_computer_id()
@@ -189,7 +189,7 @@ def remove_neighbor_dupes(path, to_delete=False, verbose_mode=True):
                 .filter(File.md5_hash == file1.md5_hash) \
                 .filter(File.path == file1.path) \
                 .filter(File.file_name != file1.file_name) \
-                .filter(File.is_deleted != False) \
+                .filter(File.is_deleted == False) \
                 .first()
             if existing_copy:
                 if verbose_mode:
@@ -209,7 +209,7 @@ def kill_from_pc(path, to_delete=False, verbose_mode=True):
             existing_copy = s.query(File) \
                 .filter(File.md5_hash == file1.md5_hash) \
                 .filter(File.computer_id != file1.computer_id) \
-                .filter(File.is_deleted != False) \
+                .filter(File.is_deleted == False) \
                 .first()
             if existing_copy:
                 if verbose_mode:
@@ -229,7 +229,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
             file2 = File(root, f)
             existing_copy = s.query(File) \
                 .filter(File.md5_hash == file2.md5_hash) \
-                .filter(File.is_deleted != False) \
+                .filter(File.is_deleted == False) \
                 .filter(File.path != file2.path).first()
             if existing_copy and (directory not in existing_copy.get_full_path()):
                 if verbose_mode:
