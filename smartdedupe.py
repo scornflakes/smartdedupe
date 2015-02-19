@@ -146,10 +146,10 @@ class File(Base):
 
     def delete(self):
         fullpath = self.get_full_path()
-        if os.exists(self.get_full_path()):
-            os.remove()
+        if os.path.exists(self.get_full_path()):
+            os.remove(fullpath)
         else:
-            print ("already removed...")
+            print("already removed...")
         # s.delete(self)
         self.is_deleted = True
         s.commit()
