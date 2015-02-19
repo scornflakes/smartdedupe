@@ -312,7 +312,7 @@ def main():
                 .filter(File.computer_id == get_computer_id()) \
                 .all()
             for missing_file in missing_files:
-                if root_folder in missing_file.get_full_path():
+                if dir in missing_file.get_full_path():
                     missing_file.is_deleted = True
             s.commit()
     if args.list_dupes:
