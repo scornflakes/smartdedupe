@@ -276,8 +276,18 @@ def main():
     parser.add_argument("-l", "--list_dupes", action='append')
     parser.add_argument("-n", "--list_neighbors", action='append')
     parser.add_argument("-k", "--kill_from_pc", action='append')
+    parser.add_argument("-p", "--print_files", action='append')
+    parser.add_argument("-r", "--remove-from-db", action='append')
     args = parser.parse_args()
 
+    if args.print_files:
+        for dir in args.print_files:
+            files = s.query(File)\
+                .filter(File.path.like(dir.replace('\\','\\\\')+"%"))\
+                .filter(File.is_deleted == False) \
+                .all()
+            for f in files:
+                print(f.file_name)
 
     if args.scan_dirs:
         for dir in args.scan_dirs:
