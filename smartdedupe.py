@@ -205,17 +205,17 @@ def kill_from_pc(directory, to_delete=False, verbose_mode=True):
     from os.path import join
 
     print('to prune:', directory)
-    directorymatch = directory.replace('\\','\\\\')+"%"
-    print(repr(directorymatch))
+    directory_match = directory.replace('\\','\\\\')+"%"
+    print(repr(directory_match))
     files = s.query(File)\
-        .filter(File.path.like(directorymatch))\
+        .filter(File.path.like(directory_match))\
         .filter(File.is_deleted == False) \
         .all()
     if len(files)==0:
         print("No files found in specified directory!")
 
     for file2 in files:
-        print(repr(file2.file_name))
+        print(file2.file_name)
         existing_copy = s.query(File) \
             .filter(File.md5_hash == file2.md5_hash) \
             .filter(File.computer_id != file2.computer_id)\
