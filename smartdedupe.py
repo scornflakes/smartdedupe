@@ -145,7 +145,11 @@ class File(Base):
             self.md5_hash = md5(full_path)
 
     def delete(self):
-        os.remove(self.get_full_path())
+        fullpath = self.get_full_path()
+        if os.exists(self.get_full_path()):
+            os.remove()
+        else:
+            print ("already removed...")
         # s.delete(self)
         self.is_deleted = True
         s.commit()
