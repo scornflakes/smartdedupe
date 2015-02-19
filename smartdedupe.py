@@ -200,7 +200,7 @@ def remove_neighbor_dupes(path, to_delete=False, verbose_mode=True):
                     file1.delete()
 
 
-def kill_from_pc(path, to_delete=False, verbose_mode=True):
+def kill_from_pc(directory, to_delete=False, verbose_mode=True):
     print('to delete files on this pc that exist on another pc')
     from os.path import join
 
