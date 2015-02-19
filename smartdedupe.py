@@ -204,20 +204,29 @@ def kill_from_pc(path, to_delete=False, verbose_mode=True):
     print('to delete files on this pc that exist on another pc')
     from os.path import join
 
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            file1 = get_or_create_file(root, f)
-            existing_copy = s.query(File) \
-                .filter(File.md5_hash == file1.md5_hash) \
-                .filter(File.computer_id != file1.computer_id) \
-                .filter(File.is_deleted == False) \
-                .first()
-            if existing_copy:
-                if verbose_mode:
-                    print(repr(file1.get_full_path()), repr(existing_copy.get_full_path()), existing_copy.computer_id)
+    print('to prune:', directory)
+    directorymatch = directory.replace('\\','\\\\')+"%"
+    print(repr(directorymatch))
+    files = s.query(File)\
+        .filter(File.path.like(directorymatch))\
+        .filter(File.is_deleted == False) \
+        .all()
+    if len(files)==0:
+        print("No files found in specified directory!")
 
-                if to_delete:
-                    file1.delete()
+    for file2 in files:
+        print(repr(file2.file_name))
+        existing_copy = s.query(File) \
+            .filter(File.md5_hash == file2.md5_hash) \
+            .filter(File.computer_id != file2.computer_id)\
+            .filter(File.is_deleted == False)\
+            .first()
+        if existing_copy:
+            if verbose_mode:
+                print(repr(file2.get_full_path()), repr(existing_copy.get_full_path()),)
+                print(file2.md5_hash, existing_copy.md5_hash)
+            if to_delete:
+                file2.delete()
 
 
 def prune(directory, to_delete=False, verbose_mode=True):
