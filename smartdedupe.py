@@ -117,6 +117,7 @@ class File(Base):
     last_modified = sqlalchemy.Column(sqlalchemy.DateTime)
     last_checked = sqlalchemy.Column(sqlalchemy.DateTime)
     is_deleted = sqlalchemy.Column(sqlalchemy.Boolean)
+    size = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     folder = None
 
     def __init__(self, path, file_name, folder_id=-1):
@@ -129,6 +130,7 @@ class File(Base):
         self.last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(full_path))
         self.last_checked = datetime.datetime.now()
         self.is_deleted = False
+        self.size = 0
 
     def get_full_path(self):
         global PATH_SEP
@@ -143,6 +145,8 @@ class File(Base):
         new_last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(full_path))
         if self.last_checked != new_last_modified:
             self.md5_hash = md5(full_path)
+        if self.size == 0:
+            os.path.getsize(full_path)
 
     def delete(self):
         fullpath = self.get_full_path()
