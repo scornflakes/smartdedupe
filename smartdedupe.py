@@ -157,7 +157,7 @@ class File(Base):
         if self.last_checked != new_last_modified:
             self.md5_hash = md5(full_path)
         if self.size == 0:
-            os.path.getsize(full_path)
+            self.size = os.path.getsize(full_path)
 
 
     def delete(self):
