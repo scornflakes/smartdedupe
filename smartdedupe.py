@@ -229,7 +229,7 @@ def kill_from_pc(directory, to_delete=False, verbose_mode=True):
     directory = directory.replace('\\','\\\\')+"%"
     print(repr(directory))
     files = s.query(File)\
-        .filter(File.path.like(directory_match))\
+        .filter(File.path.like(directory))\
         .filter(File.is_deleted == False) \
         .all()
     if len(files)==0:
