@@ -142,20 +142,33 @@ class File(Base):
 
     def update(self):
         full_path = self.get_full_path()
+        if os.path.exists(full_path):
+            self.is_deleted = False
+            new_last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(full_path))
+            if self.last_modified != new_last_modified:
+                self.md5_hash = md5(full_path)
+                self.last_modified=new_last_modified
+            self.last_checked == datetime.datetime.now()
+        else:
+            print(full_path + "is deleted")
+            self.is_deleted = True
+        s.commit()
         new_last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(full_path))
         if self.last_checked != new_last_modified:
             self.md5_hash = md5(full_path)
         if self.size == 0:
             os.path.getsize(full_path)
 
+
     def delete(self):
         fullpath = self.get_full_path()
         if os.path.exists(self.get_full_path()):
             os.remove(fullpath)
+            self.is_deleted = True
         else:
             print("already removed...")
         # s.delete(self)
-        self.is_deleted = True
+
         s.commit()
 
 
@@ -212,9 +225,9 @@ def kill_from_pc(directory, to_delete=False, verbose_mode=True):
     print('to delete files on this pc that exist on another pc')
     from os.path import join
 
-    print('to prune:', directory)
-    directory_match = directory.replace('\\','\\\\')+"%"
-    print(repr(directory_match))
+    print('to kill:', directory)
+    directory = directory.replace('\\','\\\\')+"%"
+    print(repr(directory))
     files = s.query(File)\
         .filter(File.path.like(directory_match))\
         .filter(File.is_deleted == False) \
@@ -241,23 +254,24 @@ def prune(directory, to_delete=False, verbose_mode=True):
     ### does not identify copies in same dir!!
 
     print('to prune:', directory)
-    directorymatch = directory.replace('\\','\\\\')+"%"
-    print(repr(directorymatch))
+    directory = directory.replace('\\', '\\\\')
+    directory += "%"
+    print(repr(directory))
     files = s.query(File)\
-        .filter(File.path.like(directorymatch))\
+        .filter(File.path.like(directory))\
         .filter(File.is_deleted == False) \
         .all()
     if len(files)==0:
         print("No files found in specified directory!")
 
     for file2 in files:
-        print(repr(file2.file_name))
         existing_copy = s.query(File) \
             .filter(File.md5_hash == file2.md5_hash) \
-            .filter(~ File.path.like(directory.replace('\\','\\\\')+"%"))\
+            .filter(~ File.path.like(directory))\
             .filter(File.is_deleted == False)\
+            .filter(File.computer_id == file2.computer_id)\
             .filter(File.path != file2.path).first()
-        if existing_copy and (directory not in existing_copy.get_full_path()):
+        if existing_copy:
             if verbose_mode:
                 print(repr(file2.get_full_path()), repr(existing_copy.get_full_path()),)
                 print(file2.md5_hash, existing_copy.md5_hash)
@@ -290,6 +304,7 @@ def main():
     parser.add_argument("-d", "--delete", action='store_true')
     parser.add_argument("-v", "--verbose", action='store_true')
     parser.add_argument("-s", "--scan_dirs", action='append')
+    parser.add_argument("-u", "--update_dirs", action='append')
     parser.add_argument("-l", "--list_dupes", action='append')
     parser.add_argument("-n", "--list_neighbors", action='append')
     parser.add_argument("-k", "--kill_from_pc", action='append')
@@ -311,14 +326,15 @@ def main():
             root_folder = get_or_create_folder(dir)
             current_datetime = datetime.datetime.now()
             populate_db(root_folder)
-            missing_files = s.query(File) \
-                .filter(File.last_checked < current_datetime) \
-                .filter(File.computer_id == get_computer_id()) \
-                .all()
-            for missing_file in missing_files:
-                if dir in missing_file.get_full_path():
-                    missing_file.is_deleted = True
             s.commit()
+
+    if args.update_dirs:
+        for dir in args.update_dirs:
+            for root, dirs, files in os.walk(dir):
+                for f in files:
+                    full_path = os.path.join(root, f)
+                    print(full_path)
+                    file_to_update = get_or_create_file(root, f)
     if args.list_dupes:
         for dir in args.list_dupes:
             prune(dir, to_delete=args.delete, verbose_mode=args.verbose)
@@ -328,7 +344,7 @@ def main():
     if args.kill_from_pc:
         for dir in args.kill_from_pc:
             kill_from_pc(dir, to_delete=args.delete, verbose_mode=args.verbose)
-
+    print('done')
 
 
 
