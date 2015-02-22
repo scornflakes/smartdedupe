@@ -5,11 +5,12 @@ import hashlib
 import configparser
 import socket
 import os
-import sys
 import argparse
+
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
 
 COMPUTER_NAME = socket.gethostname()
 PATH_SEP = os.path.sep
@@ -223,7 +224,6 @@ def remove_neighbor_dupes(path, to_delete=False, verbose_mode=True):
 
 def kill_from_pc(directory, to_delete=False, verbose_mode=True):
     print('to delete files on this pc that exist on another pc')
-    from os.path import join
 
     print('to kill:', directory)
     directory = directory.replace('\\','\\\\')+"%"
@@ -236,12 +236,11 @@ def kill_from_pc(directory, to_delete=False, verbose_mode=True):
         print("No files found in specified directory!")
 
     for file2 in files:
-        print(file2.file_name)
         existing_copy = s.query(File) \
-            .filter(File.md5_hash == file2.md5_hash) \
-            .filter(File.computer_id != file2.computer_id)\
             .filter(File.is_deleted == False)\
-            .first()
+            .filter(File.computer_id != file2.computer_id)\
+            .filter(File.md5_hash == file2.md5_hash) \
+            .one()
         if existing_copy:
             if verbose_mode:
                 print(repr(file2.get_full_path()), repr(existing_copy.get_full_path()),)
