@@ -240,6 +240,8 @@ def kill_from_pc(directory, to_delete=False, verbose_mode=True):
     files = s.query(File)\
         .filter(File.path.like(directory))\
         .filter(File.is_deleted == False) \
+        .filter(File.size != 0)\
+        .filter(File.computer_id==get_computer_id())\
         .all()
     if len(files)==0:
         print("No files found in specified directory!")
@@ -269,6 +271,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
     files = s.query(File)\
         .filter(File.path.like(directory_match))\
         .filter(File.is_deleted == False) \
+        .filter(File.computer_id==get_computer_id())\
         .filter(File.size != 0)\
         .all()
     total_count = len(files)
