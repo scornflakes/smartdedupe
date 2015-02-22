@@ -233,7 +233,7 @@ def kill_from_pc(directory, to_delete=False, verbose_mode=True):
     if len(files)==0:
         print("No files found in specified directory!")
     else:
-        print('I found a total of {} files'.format(len(files)))
+        print('I found a total of {} files in this directory'.format(len(files)))
     for file2 in files:
         existing_copy = s.query(File) \
             .filter(File.is_deleted == False)\
@@ -335,8 +335,10 @@ def main():
                     full_path = os.path.join(root, f)
                     print(full_path)
                     file_to_update = get_or_create_file(root, f)
+        print('finding missing files...')
         missing_files = s.query(File)\
             .filter(File.is_deleted == False)\
+            .filter(File.path.like(dir.replace('\\','\\\\')+"%"))\
             .filter(File.last_checked < current_datetime)\
             .filter(File.computer_id  == get_computer_id())
         for missing_file in missing_files:
