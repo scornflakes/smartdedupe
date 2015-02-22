@@ -131,7 +131,7 @@ class File(Base):
         self.last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(full_path))
         self.last_checked = datetime.datetime.now()
         self.is_deleted = False
-        self.size = 0
+        self.size = os.path.getsize(full_path)
 
     def get_full_path(self):
         global PATH_SEP
@@ -149,17 +149,15 @@ class File(Base):
             if self.last_modified != new_last_modified:
                 self.md5_hash = md5(full_path)
                 self.last_modified=new_last_modified
-            self.last_checked == datetime.datetime.now()
+            if self.size == 0:
+                self.size = os.path.getsize(full_path)
+            self.last_checked= datetime.datetime.now()
         else:
             print(full_path + "is deleted")
             self.is_deleted = True
-        s.commit()
-        new_last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(full_path))
-        if self.last_checked != new_last_modified:
-            self.md5_hash = md5(full_path)
-        if self.size == 0:
-            self.size = os.path.getsize(full_path)
 
+
+        s.commit()
 
     def delete(self):
         fullpath = self.get_full_path()
@@ -169,7 +167,7 @@ class File(Base):
         else:
             print("already removed...")
         # s.delete(self)
-
+        s.add(self)
         s.commit()
 
 
@@ -234,7 +232,8 @@ def kill_from_pc(directory, to_delete=False, verbose_mode=True):
         .all()
     if len(files)==0:
         print("No files found in specified directory!")
-
+    else:
+        print('I found a total of {} files'.format(len(files)))
     for file2 in files:
         existing_copy = s.query(File) \
             .filter(File.is_deleted == False)\
@@ -294,6 +293,7 @@ def get_or_create_file(path, file_name):
         s.add(file1)
     else:
         file1.update()
+    s.add(file1)
     s.commit()
     return file1
 
