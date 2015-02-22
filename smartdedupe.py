@@ -328,12 +328,18 @@ def main():
             s.commit()
 
     if args.update_dirs:
+        current_datetime= datetime.datetime.now()
         for dir in args.update_dirs:
             for root, dirs, files in os.walk(dir):
                 for f in files:
                     full_path = os.path.join(root, f)
                     print(full_path)
                     file_to_update = get_or_create_file(root, f)
+        missing_files = s.query(File)\
+            .filter(File.is_deleted == False)\
+            .filter(File.last_checked < current_datetime)
+        for missing_file in missing_files:
+            missing_file.update()
     if args.list_dupes:
         for dir in args.list_dupes:
             prune(dir, to_delete=args.delete, verbose_mode=args.verbose)
