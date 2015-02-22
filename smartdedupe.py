@@ -326,6 +326,8 @@ def main():
     parser.add_argument("-r", "--remove-from-db", action='append')
     args = parser.parse_args()
 
+    if not args.verbose:
+        print("verbose mode=off")
     if args.print_files:
         for dir in args.print_files:
             files = s.query(File)\
