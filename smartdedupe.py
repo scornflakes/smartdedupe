@@ -222,7 +222,7 @@ def remove_neighbor_dupes(path, to_delete=False, verbose_mode=True):
 
 def kill_from_pc(directory, to_delete=False, verbose_mode=True):
     print('to delete files on this pc that exist on another pc')
-
+    print('delete?' + repr(to_delete))
     print('to kill:', directory)
     directory = directory.replace('\\','\\\\')+"%"
     print(repr(directory))
