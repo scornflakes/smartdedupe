@@ -162,8 +162,11 @@ class File(Base):
     def delete(self):
         fullpath = self.get_full_path()
         if os.path.exists(self.get_full_path()):
-            os.remove(fullpath)
-            self.is_deleted = True
+            try:
+                os.remove(fullpath)
+                self.is_deleted = True
+            except Exception:
+                print('could not delete...')
         else:
             print("already removed...")
         # s.delete(self)
@@ -252,29 +255,41 @@ def prune(directory, to_delete=False, verbose_mode=True):
     ### does not identify copies in same dir!!
 
     print('to prune:', directory)
-    directory = directory.replace('\\', '\\\\')
-    directory += "%"
-    print(repr(directory))
+    directory_match = directory.replace('\\', '\\\\') + "%"
+
+    print(repr(directory_match))
     files = s.query(File)\
-        .filter(File.path.like(directory))\
+        .filter(File.path.like(directory_match))\
         .filter(File.is_deleted == False) \
+        .filter(File.size != 0)\
         .all()
+    total_count = len(files)
+    i = 0
+    total_size = 0
     if len(files)==0:
         print("No files found in specified directory!")
+    else:
+        print('I found a total of {} files in this directory'.format(len(files)))
 
     for file2 in files:
+        i += 1
         existing_copy = s.query(File) \
-            .filter(File.md5_hash == file2.md5_hash) \
-            .filter(~ File.path.like(directory))\
             .filter(File.is_deleted == False)\
             .filter(File.computer_id == file2.computer_id)\
+            .filter(File.md5_hash == file2.md5_hash) \
+            .filter(~ File.path.like(directory_match))\
             .filter(File.path != file2.path).first()
         if existing_copy:
             if verbose_mode:
                 print(repr(file2.get_full_path()), repr(existing_copy.get_full_path()),)
-                print(file2.md5_hash, existing_copy.md5_hash)
+                print(file2.md5_hash, existing_copy.md5_hash, file2.size)
+                total_size += file2.size
             if to_delete:
                 file2.delete()
+        else:
+            if verbose_mode and (i % 5) == 0:
+                print("no copy...{}/{}".format(i, total_count))
+    print(" I removed {} bytes worth of data in {} files".format(total_size, total_count))
 
 
 def get_or_create_folder(path):
