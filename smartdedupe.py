@@ -259,6 +259,7 @@ def kill_from_pc(directory, to_delete=False, verbose_mode=True):
                 print(file2.md5_hash, existing_copy.md5_hash)
             if to_delete:
                 file2.delete()
+    remove_empty_folders(directory)
 
 
 def prune(directory, to_delete=False, verbose_mode=True):
@@ -300,6 +301,7 @@ def prune(directory, to_delete=False, verbose_mode=True):
         else:
             if verbose_mode and (i % 5) == 0:
                 print("no copy...{}/{}".format(i, total_count))
+    remove_empty_folders(directory)
     print(" I removed {} bytes worth of data in {} files".format(total_size, total_count))
 
 
@@ -323,6 +325,23 @@ def get_or_create_file(path, file_name):
     s.commit()
     return file1
 
+def remove_empty_folders(path):
+  if not os.path.isdir(path):
+    return
+
+  # remove empty subfolders
+  files = os.listdir(path)
+  if len(files):
+    for f in files:
+      fullpath = os.path.join(path, f)
+      if os.path.isdir(fullpath):
+        remove_empty_folders(fullpath)
+
+  # if folder empty, delete it
+  files = os.listdir(path)
+  if len(files) == 0:
+    print("Removing empty folder:", path)
+    os.rmdir(path)
 
 def main():
     parser = argparse.ArgumentParser(description="find duplicates in folders")
@@ -363,14 +382,14 @@ def main():
                     full_path = os.path.join(root, f)
                     print(full_path)
                     file_to_update = get_or_create_file(root, f)
-        print('finding missing files...')
-        missing_files = s.query(File)\
-            .filter(File.is_deleted == False)\
-            .filter(File.path.like(dir.replace('\\','\\\\')+"%"))\
-            .filter(File.last_checked < current_datetime)\
-            .filter(File.computer_id  == get_computer_id())
-        for missing_file in missing_files:
-            missing_file.update()
+            print('finding missing files...')
+            missing_files = s.query(File)\
+                .filter(File.is_deleted == False)\
+                .filter(File.path.like(dir.replace('\\','\\\\')+"%"))\
+                .filter(File.last_checked < current_datetime)\
+                .filter(File.computer_id  == get_computer_id())
+            for missing_file in missing_files:
+                missing_file.update()
     if args.list_dupes:
         for dir in args.list_dupes:
             prune(dir, to_delete=args.delete, verbose_mode=args.verbose)
