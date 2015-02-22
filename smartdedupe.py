@@ -128,10 +128,15 @@ class File(Base):
         self.path = path
         full_path = self.get_full_path()
         self.md5_hash = md5(full_path)
-        self.last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(full_path))
+        try:
+            self.last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(full_path))
+            self.size = os.path.getsize(full_path)
+        except:
+            self.last_modified = 0
+            self.size = 0
         self.last_checked = datetime.datetime.now()
         self.is_deleted = False
-        self.size = os.path.getsize(full_path)
+
 
     def get_full_path(self):
         global PATH_SEP
@@ -165,6 +170,7 @@ class File(Base):
             try:
                 os.remove(fullpath)
                 self.is_deleted = True
+                print('deleted!')
             except Exception:
                 print('could not delete...')
         else:
