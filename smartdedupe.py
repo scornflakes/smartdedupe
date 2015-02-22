@@ -240,7 +240,7 @@ def kill_from_pc(directory, to_delete=False, verbose_mode=True):
             .filter(File.is_deleted == False)\
             .filter(File.computer_id != file2.computer_id)\
             .filter(File.md5_hash == file2.md5_hash) \
-            .one()
+            .first()
         if existing_copy:
             if verbose_mode:
                 print(repr(file2.get_full_path()), repr(existing_copy.get_full_path()),)
