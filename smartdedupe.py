@@ -153,7 +153,7 @@ class File(Base):
                 self.size = os.path.getsize(full_path)
             self.last_checked= datetime.datetime.now()
         else:
-            print(full_path + "is deleted")
+            print(full_path + " is deleted")
             self.is_deleted = True
 
 
@@ -337,7 +337,8 @@ def main():
                     file_to_update = get_or_create_file(root, f)
         missing_files = s.query(File)\
             .filter(File.is_deleted == False)\
-            .filter(File.last_checked < current_datetime)
+            .filter(File.last_checked < current_datetime)\
+            .filter(File.computer_id  == get_computer_id())
         for missing_file in missing_files:
             missing_file.update()
     if args.list_dupes:
